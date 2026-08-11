@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Master Component System v0.1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Karla:wght@400;500;600&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   LAYER 1 — TOKENS
+   This block is the entire brand. Swap it per client.
+   Nothing below this block references a literal colour or font.
+   ============================================================ */
+:root,
+[data-direction="record"]{
+  --font-display:'Archivo',sans-serif;
+  --font-body:'Inter',sans-serif;
+  --font-data:'JetBrains Mono',monospace;
+
+  --ink:#141A21;
+  --ink-muted:#5C6875;
+  --surface:#FBFAF8;
+  --surface-alt:#EDEDE8;
+  --accent:#1B4B8F;
+  --accent-contrast:#FBFAF8;
+  --line:#DCDCD5;
+
+  --display-size:clamp(2.6rem,7vw,4.6rem);
+  --display-tracking:-0.03em;
+  --display-weight:700;
+  --h1-size:clamp(2rem,4.5vw,3rem);
+  --h2-size:clamp(1.35rem,2.4vw,1.75rem);
+  --radius:2px;
+  --section-y:clamp(4.5rem,9vw,8rem);
+}
+
+[data-direction="coastal"]{
+  --font-display:'Fraunces',serif;
+  --font-body:'Karla',sans-serif;
+  --font-data:'Karla',sans-serif;
+
+  --ink:#1E2B2B;
+  --ink-muted:#6A7A78;
+  --surface:#F6F1E8;
+  --surface-alt:#E7DECF;
+  --accent:#0E5C58;
+  --accent-contrast:#F6F1E8;
+  --line:#D8CDBA;
+
+  --display-size:clamp(2.7rem,7.5vw,5rem);
+  --display-tracking:-0.02em;
+  --display-weight:600;
+  --radius:14px;
+}
+
+[data-direction="metropolitan"]{
+  --font-display:'Syne',sans-serif;
+  --font-body:'Inter',sans-serif;
+  --font-data:'Inter',sans-serif;
+
+  --ink:#0B0B0C;
+  --ink-muted:#83838C;
+  --surface:#F2F2F0;
+  --surface-alt:#E2E2DE;
+  --accent:#C2410C;
+  --accent-contrast:#FFFFFF;
+  --line:#D2D2CC;
+
+  --display-size:clamp(2.8rem,8vw,5.4rem);
+  --display-tracking:-0.045em;
+  --display-weight:800;
+  --radius:0px;
+}
+
+/* ============================================================
+   LAYER 2 — PRIMITIVES
+   ============================================================ */
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--surface);color:var(--ink);
+  font-family:var(--font-body);font-size:17px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+img{max-width:100%;display:block}
+a{color:inherit}
+.wrap{width:min(1120px,100% - 2.5rem);margin-inline:auto}
+.narrow{width:min(680px,100% - 2.5rem);margin-inline:auto}
+.section{padding-block:var(--section-y)}
+.section--alt{background:var(--surface-alt)}
+.display{font-family:var(--font-display);font-weight:var(--display-weight);
+  font-size:var(--display-size);line-height:1.02;letter-spacing:var(--display-tracking);margin:0}
+.h1{font-family:var(--font-display);font-weight:var(--display-weight);
+  font-size:var(--h1-size);line-height:1.1;letter-spacing:var(--display-tracking);margin:0 0 1rem}
+.h2{font-family:var(--font-display);font-weight:600;font-size:var(--h2-size);
+  line-height:1.2;margin:0 0 .5rem}
+.lede{font-size:clamp(1.1rem,1.8vw,1.3rem);line-height:1.5;color:var(--ink-muted);margin:0}
+.label{font-family:var(--font-data);font-size:.72rem;text-transform:uppercase;
+  letter-spacing:.14em;color:var(--ink-muted);display:block;margin-bottom:1.25rem}
+.data{font-family:var(--font-data);font-size:.85rem;letter-spacing:.01em}
+.muted{color:var(--ink-muted)}
+.btn{display:inline-block;font-family:var(--font-body);font-weight:600;font-size:.95rem;
+  padding:.95rem 1.9rem;border-radius:var(--radius);text-decoration:none;
+  background:var(--accent);color:var(--accent-contrast);border:1px solid var(--accent);
+  transition:opacity .2s}
+.btn:hover{opacity:.85}
+.btn--ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.rule{height:1px;background:var(--line);border:0;margin:0}
+.grid{display:grid;gap:clamp(1.5rem,3vw,2.5rem)}
+@media(min-width:720px){
+  .grid--2{grid-template-columns:1fr 1fr}
+  .grid--3{grid-template-columns:repeat(3,1fr)}
+  .grid--sidebar{grid-template-columns:1fr 1.25fr;align-items:center}
+}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+@media(prefers-reduced-motion:no-preference){
+  .reveal{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease}
+  .reveal.in{opacity:1;transform:none}
+}
+
+/* UNVERIFIED marker — never ship a section still showing this */
+[data-unverified]{position:relative;outline:1px dashed #C2410C;outline-offset:6px}
+[data-unverified]::after{content:"UNVERIFIED — confirm or delete";position:absolute;top:-1.7rem;left:0;
+  font-family:var(--font-data);font-size:.6rem;letter-spacing:.1em;color:#C2410C;white-space:nowrap}
+
+/* ============================================================
+   LAYER 3 — COMPONENTS
+   ============================================================ */
+/* C01 Nav */
+.nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--surface) 88%,transparent);
+  backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.nav__in{display:flex;align-items:center;justify-content:space-between;padding-block:1rem}
+.nav__mark{font-family:var(--font-display);font-weight:var(--display-weight);
+  font-size:1.05rem;letter-spacing:.02em;text-decoration:none}
+.nav__links{display:none;gap:1.75rem;font-size:.9rem}
+.nav__links a{text-decoration:none;color:var(--ink-muted)}
+.nav__links a:hover{color:var(--ink)}
+@media(min-width:840px){.nav__links{display:flex}}
+
+/* C02 Hero A — Portrait */
+.heroA{padding-block:clamp(3rem,7vw,6rem)}
+.heroA__img{aspect-ratio:4/5;object-fit:cover;border-radius:var(--radius);width:100%}
+.heroA__meta{display:flex;flex-wrap:wrap;gap:.6rem 1.5rem;margin-top:1.75rem}
+
+/* C03 Hero B — Statement */
+.heroB{min-height:78vh;display:grid;align-items:end;padding-block:clamp(4rem,10vw,7rem);
+  background-size:cover;background-position:center;position:relative;color:#fff}
+.heroB::before{content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.72))}
+.heroB__in{position:relative}
+.heroB .lede{color:rgba(255,255,255,.82)}
+
+/* C05 Positioning statement */
+.statement{font-family:var(--font-display);font-weight:var(--display-weight);
+  font-size:clamp(1.5rem,3.4vw,2.4rem);line-height:1.25;letter-spacing:-.02em;margin:0}
+
+/* C07 Neighborhoods */
+.hood{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;
+  padding-block:1.35rem;border-bottom:1px solid var(--line);text-decoration:none}
+.hood:first-of-type{border-top:1px solid var(--line)}
+.hood__name{font-family:var(--font-display);font-weight:600;font-size:clamp(1.2rem,2.6vw,1.9rem)}
+.hood:hover .hood__name{color:var(--accent)}
+
+/* C08 Proof stats */
+.stat__n{font-family:var(--font-display);font-weight:var(--display-weight);
+  font-size:clamp(2.2rem,5vw,3.4rem);line-height:1;letter-spacing:-.03em;display:block}
+
+/* C09 Listings */
+.card{text-decoration:none;display:block}
+.card__img{aspect-ratio:3/2;object-fit:cover;border-radius:var(--radius);width:100%}
+.card__row{display:flex;justify-content:space-between;gap:1rem;margin-top:.9rem}
+
+/* C10 Process */
+.step{padding-block:1.6rem;border-top:1px solid var(--line);display:grid;gap:.4rem}
+@media(min-width:720px){.step{grid-template-columns:5rem 1fr;gap:2rem}}
+
+/* C11 Quote */
+.quote{font-family:var(--font-display);font-weight:400;
+  font-size:clamp(1.3rem,2.8vw,2rem);line-height:1.35;margin:0 0 1.25rem}
+
+/* C12 CTA + form */
+.form{display:grid;gap:1rem;margin-top:2rem}
+.form input,.form textarea{font-family:var(--font-body);font-size:1rem;padding:.95rem 1.1rem;
+  border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);color:var(--ink);width:100%}
+.form textarea{min-height:130px;resize:vertical}
+
+/* C13 Footer */
+.foot{padding-block:3rem;border-top:1px solid var(--line);font-size:.85rem;color:var(--ink-muted)}
+.foot__legal{margin-top:1.5rem;font-size:.75rem;line-height:1.6}
+
+/* Direction switcher — internal tool only, delete for client builds */
+.switch{position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);z-index:99;
+  display:flex;gap:.25rem;background:#141A21;padding:.3rem;border-radius:999px;
+  box-shadow:0 8px 30px rgba(0,0,0,.28)}
+.switch button{font-family:'Inter',sans-serif;font-size:.72rem;font-weight:600;color:#fff;
+  background:transparent;border:0;padding:.55rem 1rem;border-radius:999px;cursor:pointer}
+.switch button[aria-pressed="true"]{background:#fff;color:#141A21}
+</style>
+</head>
+
+<body data-direction="record">
+
+<!-- C01 NAV -->
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="nav__mark" href="#">Agent Name</a>
+    <nav class="nav__links">
+      <a href="#about">About</a><a href="#areas">Areas</a>
+      <a href="#listings">Listings</a><a href="#contact">Contact</a>
+    </nav>
+    <a class="btn" href="#contact" style="padding:.7rem 1.3rem;font-size:.85rem">Get in touch</a>
+  </div>
+</header>
+
+<!-- C02 HERO A — PORTRAIT -->
+<section class="heroA">
+  <div class="wrap grid grid--sidebar">
+    <img class="heroA__img" alt="Agent portrait"
+      src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=900&q=80">
+    <div>
+      <span class="label">Component C02 · Hero A</span>
+      <h1 class="display">Buying and selling<br>on the north shore.</h1>
+      <p class="lede" style="margin-top:1.5rem">One line of positioning, drawn from what this agent
+        actually does. Not a welcome message.</p>
+      <div class="heroA__meta">
+        <span class="data">BROKERAGE NAME</span>
+        <span class="data muted">LICENSE #0000000</span>
+      </div>
+      <div style="margin-top:2rem;display:flex;gap:.75rem;flex-wrap:wrap">
+        <a class="btn" href="#contact">Start a conversation</a>
+        <a class="btn btn--ghost" href="#listings">See listings</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- C03 HERO B — STATEMENT (alternate; use one hero, not both) -->
+<section class="heroB" style="background-image:url('https://images.unsplash.com/photo-1449844908441-8829872d2607?w=1600&q=80')">
+  <div class="wrap heroB__in">
+    <span class="label" style="color:rgba(255,255,255,.7)">Component C03 · Hero B</span>
+    <h2 class="display">Twelve years<br>on one peninsula.</h2>
+    <p class="lede" style="margin-top:1.25rem;max-width:34rem">
+      For agents whose credibility is geographic rather than personal.</p>
+  </div>
+</section>
+
+<!-- C05 POSITIONING STATEMENT -->
+<section class="section section--alt">
+  <div class="narrow">
+    <span class="label">Component C05 · Statement</span>
+    <p class="statement">Most people arrive here already knowing the name. This section
+      answers the only question they came with: is this person any good.</p>
+  </div>
+</section>
+
+<!-- C06 ABOUT -->
+<section class="section" id="about">
+  <div class="wrap grid grid--sidebar">
+    <img alt="Portrait" style="border-radius:var(--radius);aspect-ratio:1;object-fit:cover"
+      src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=800&q=80">
+    <div>
+      <span class="label">Component C06 · About</span>
+      <h2 class="h1">A short biography that sounds like a person.</h2>
+      <p class="muted">Two or three paragraphs, written from public sources and confirmed
+        by the agent before launch. Specifics only — the town they grew up in, the kind of
+        client they take, what they actually did before real estate.</p>
+      <p class="muted">Every factual claim here traces to something verifiable. Anything
+        that cannot be confirmed gets the unverified marker below rather than an invention.</p>
+    </div>
+  </div>
+</section>
+
+<!-- C07 NEIGHBORHOODS -->
+<section class="section section--alt" id="areas">
+  <div class="wrap">
+    <span class="label">Component C07 · Areas served</span>
+    <h2 class="h1" style="margin-bottom:2.5rem">Where I work</h2>
+    <a class="hood" href="#"><span class="hood__name">Marblehead</span><span class="data muted">HARBOR · HISTORIC</span></a>
+    <a class="hood" href="#"><span class="hood__name">Swampscott</span><span class="data muted">COASTAL · FAMILY</span></a>
+    <a class="hood" href="#"><span class="hood__name">Salem</span><span class="data muted">DOWNTOWN · CONDO</span></a>
+    <a class="hood" href="#"><span class="hood__name">Beverly Farms</span><span class="data muted">ESTATE</span></a>
+  </div>
+</section>
+
+<!-- C08 PROOF -->
+<section class="section">
+  <div class="wrap">
+    <span class="label">Component C08 · Proof</span>
+    <div class="grid grid--3" data-unverified>
+      <div><span class="stat__n">—</span><span class="data muted">TRANSACTIONS CLOSED</span></div>
+      <div><span class="stat__n">—</span><span class="data muted">YEARS LICENSED</span></div>
+      <div><span class="stat__n">—</span><span class="data muted">AVG DAYS ON MARKET</span></div>
+    </div>
+    <p class="data muted" style="margin-top:2rem">Numbers stay as em-dashes until the agent
+      supplies them. A fabricated statistic is a licensing problem, not a design problem.</p>
+  </div>
+</section>
+
+<!-- C09 LISTINGS -->
+<section class="section section--alt" id="listings">
+  <div class="wrap">
+    <span class="label">Component C09 · Listings</span>
+    <h2 class="h1" style="margin-bottom:2.5rem">Current and recent</h2>
+    <div class="grid grid--3">
+      <a class="card" href="#">
+        <img class="card__img" alt="" src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800&q=80">
+        <div class="card__row"><span class="h2">14 Orchard St</span><span class="data">ACTIVE</span></div>
+        <span class="data muted">3 BD · 2 BA · 1,840 SF</span>
+      </a>
+      <a class="card" href="#">
+        <img class="card__img" alt="" src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80">
+        <div class="card__row"><span class="h2">8 Beacon Ln</span><span class="data">PENDING</span></div>
+        <span class="data muted">4 BD · 3 BA · 2,610 SF</span>
+      </a>
+      <a class="card" href="#">
+        <img class="card__img" alt="" src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80">
+        <div class="card__row"><span class="h2">221 Front St</span><span class="data">SOLD</span></div>
+        <span class="data muted">2 BD · 2 BA · 1,120 SF</span>
+      </a>
+    </div>
+    <p class="data muted" style="margin-top:2rem">Demo imagery is Unsplash-licensed.
+      Replace with the agent's own photography at launch — never MLS photos.</p>
+  </div>
+</section>
+
+<!-- C10 PROCESS -->
+<section class="section">
+  <div class="wrap narrow" style="margin-inline:auto">
+    <span class="label">Component C10 · Process</span>
+    <h2 class="h1" style="margin-bottom:2rem">How this actually goes</h2>
+    <div class="step"><span class="data muted">FIRST</span><div><h3 class="h2">We talk before anything else</h3>
+      <p class="muted" style="margin:0">Numbered only because the order genuinely matters here.</p></div></div>
+    <div class="step"><span class="data muted">THEN</span><div><h3 class="h2">Pricing and preparation</h3>
+      <p class="muted" style="margin:0">Each step names a real thing that happens.</p></div></div>
+    <div class="step"><span class="data muted">FINALLY</span><div><h3 class="h2">Market, negotiate, close</h3>
+      <p class="muted" style="margin:0">Delete this whole section for agents whose value is relationship, not process.</p></div></div>
+  </div>
+</section>
+
+<!-- C11 QUOTE -->
+<section class="section section--alt">
+  <div class="narrow" data-unverified>
+    <span class="label">Component C11 · Testimonial</span>
+    <blockquote class="quote">Real client language, supplied by the agent or pulled from a
+      public review they can point to.</blockquote>
+    <span class="data muted">— ATTRIBUTION REQUIRED</span>
+  </div>
+</section>
+
+<!-- C12 CTA + FORM -->
+<section class="section" id="contact">
+  <div class="narrow">
+    <span class="label">Component C12 · Contact</span>
+    <h2 class="h1">Let's talk about your move.</h2>
+    <p class="lede">One clear action. No newsletter, no chatbot, no second ask.</p>
+    <form class="form" name="contact" method="POST" data-netlify="true">
+      <input type="hidden" name="form-name" value="contact">
+      <input type="text" name="name" placeholder="Your name" required>
+      <input type="email" name="email" placeholder="Email" required>
+      <textarea name="message" placeholder="What are you thinking about?"></textarea>
+      <div><button class="btn" type="submit">Send</button></div>
+    </form>
+  </div>
+</section>
+
+<!-- C13 FOOTER -->
+<footer class="foot">
+  <div class="wrap">
+    <div class="grid grid--2">
+      <div>
+        <span class="nav__mark">Agent Name</span>
+        <p class="data" style="margin-top:.75rem">hello@example.com · (555) 000-0000</p>
+      </div>
+      <div><span class="data muted">Component C13 · Footer</span></div>
+    </div>
+    <p class="foot__legal">Brokerage compliance line goes here — brokerage legal name, office
+      address, and license number, sized per state rule and brokerage policy. This is confirmed
+      per client before launch, not assumed. Equal Housing Opportunity.</p>
+  </div>
+</footer>
+
+<!-- INTERNAL ONLY — delete for client builds -->
+<div class="switch" role="group" aria-label="Design direction">
+  <button aria-pressed="true" data-d="record">Record</button>
+  <button aria-pressed="false" data-d="coastal">Coastal</button>
+  <button aria-pressed="false" data-d="metropolitan">Metro</button>
+</div>
+
+<script>
+document.querySelectorAll('.switch button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.body.dataset.direction=b.dataset.d;
+    document.querySelectorAll('.switch button').forEach(x=>
+      x.setAttribute('aria-pressed',String(x===b)));
+  });
+});
+const io=new IntersectionObserver(es=>es.forEach(e=>{
+  if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}
+}),{threshold:.12});
+document.querySelectorAll('.section,.heroA,.heroB').forEach(el=>{
+  el.classList.add('reveal');io.observe(el)});
+</script>
+</body>
+</html>
